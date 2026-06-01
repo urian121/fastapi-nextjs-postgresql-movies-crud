@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Save, Loader2, Clapperboard } from 'lucide-react'
 import type { MovieFormData } from '@/app/types/movie'
 import { createMovie } from '@/app/lib/api'
+import { showToast } from "nextjs-toast-notify";
 
 interface Props {
   onSuccess: () => void
@@ -28,22 +29,27 @@ const GENRES = [
 const STARS_OPTIONS = [5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0]
 
 export default function MovieForm({ onSuccess }: Props) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<MovieFormData>()
+  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<MovieFormData>()
 
   async function onSubmit(data: MovieFormData) {
-    await createMovie({ ...data, year: Number(data.year), stars: Number(data.stars) })
-    reset()
-    onSuccess()
+    try {
+      await createMovie({ ...data, year: Number(data.year), stars: Number(data.stars) })
+      reset()
+      onSuccess()
+
+      showToast.success("¡La Película fue registrada con éxito!", {
+        position: "top-right",
+        transition: "topBounce",
+        sound: true,
+      });
+    } catch {
+      alert('Error al crear la película')
+    }
   }
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="px-6 py-5 border-b border-gray-200 bg-white">
+      <div className="px-6 py-5 bg-white">
         <div className="flex items-center gap-2">
           <Clapperboard size={18} className="text-zinc-700" />
           <h2 className="text-lg font-semibold text-gray-900">Nueva película</h2>
@@ -52,42 +58,35 @@ export default function MovieForm({ onSuccess }: Props) {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 flex flex-col gap-4">
-        <Field label="Título" error={errors.title?.message}>
+        <Field label="Título">
           <input
-            {...register('title', { required: 'El título es obligatorio' })}
-            placeholder="The Shawshank Redemption"
-            className={input(!!errors.title)}
+            {...register('title', { required: true })}
+            placeholder="El título de la Película"
+            className={input}
           />
         </Field>
 
-        <Field label="Descripción" error={errors.description?.message}>
+        <Field label="Descripción">
           <textarea
-            {...register('description', { required: 'La descripción es obligatoria' })}
+            {...register('description', { required: true })}
             rows={3}
             placeholder="Breve sinopsis de la película..."
-            className={input(!!errors.description)}
+            className={input}
           />
         </Field>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Año" error={errors.year?.message}>
+          <Field label="Año">
             <input
               type="number"
-              {...register('year', {
-                required: 'El año es obligatorio',
-                min: { value: 1888, message: 'Año mínimo 1888' },
-                max: { value: CURRENT_YEAR, message: `Máximo ${CURRENT_YEAR}` },
-              })}
+              {...register('year', { required: true, min: 1888, max: CURRENT_YEAR })}
               placeholder="1994"
-              className={input(!!errors.year)}
+              className={input}
             />
           </Field>
 
-          <Field label="Estrellas" error={errors.stars?.message}>
-            <select
-              {...register('stars', { required: 'Las estrellas son obligatorias' })}
-              className={select(!!errors.stars)}
-            >
+          <Field label="Estrellas">
+            <select {...register('stars', { required: true })} className={selectCls}>
               <option value="">Seleccionar</option>
               {STARS_OPTIONS.map((s) => (
                 <option key={s} value={s}>
@@ -98,11 +97,8 @@ export default function MovieForm({ onSuccess }: Props) {
           </Field>
         </div>
 
-        <Field label="Género" error={errors.genre?.message}>
-          <select
-            {...register('genre', { required: 'El género es obligatorio' })}
-            className={select(!!errors.genre)}
-          >
+        <Field label="Género">
+          <select {...register('genre', { required: true })} className={selectCls}>
             <option value="">Seleccionar</option>
             {GENRES.map((g) => (
               <option key={g} value={g}>{g}</option>
@@ -110,26 +106,26 @@ export default function MovieForm({ onSuccess }: Props) {
           </select>
         </Field>
 
-        <Field label="URL de la imagen" error={errors.image_url?.message}>
+        <Field label="URL de la imagen">
           <input
-            {...register('image_url', { required: 'La URL es obligatoria' })}
+            {...register('image_url', { required: true })}
             placeholder="https://example.com/poster.jpg"
-            className={input(!!errors.image_url)}
+            className={input}
           />
         </Field>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-400 text-white font-medium rounded-lg transition-colors text-sm hover:cursor-pointer outline-none"
+          className="w-fit self-end py-2.5 px-5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-400 text-white font-medium transition-colors text-sm hover:cursor-pointer outline-none"
         >
           {isSubmitting ? (
-            <span className="flex items-center justify-center gap-2">
+            <span className="flex items-center gap-2">
               <Loader2 size={15} className="animate-spin" />
               Guardando...
             </span>
           ) : (
-            <span className="flex items-center justify-center gap-2">
+            <span className="flex items-center gap-2">
               <Save size={15} />
               Guardar película
             </span>
@@ -140,32 +136,15 @@ export default function MovieForm({ onSuccess }: Props) {
   )
 }
 
-function input(hasError: boolean) {
-  return `w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-zinc-900 ${
-    hasError ? 'border-red-400 bg-red-50' : 'border-zinc-200 bg-white focus:border-zinc-900'
-  }`
-}
+const input = 'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 transition-colors'
 
-function select(hasError: boolean) {
-  return `w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-zinc-900 bg-white appearance-none cursor-pointer ${
-    hasError ? 'border-red-400 bg-red-50' : 'border-zinc-200 focus:border-zinc-900'
-  }`
-}
+const selectCls = 'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-zinc-900 appearance-none cursor-pointer transition-colors'
 
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string
-  error?: string
-  children: React.ReactNode
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
       <label className="text-sm font-medium text-gray-700">{label}</label>
       {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   )
 }

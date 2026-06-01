@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Movie } from '@/app/types/movie'
+import Image from 'next/image'
 
 function StarRating({ stars }: { stars: number }) {
   return (
@@ -25,11 +26,13 @@ interface Props {
 
 export default function MovieCard({ movie, onEdit, onDelete }: Props) {
   return (
-    <div className="flex gap-3 bg-white rounded-lg shadow-sm border border-gray-100 p-3 hover:shadow-md transition-shadow">
-      <img
+    <div className="flex gap-3 bg-white p-3 hover:shadow-md transition-shadow">
+      <Image
         src={movie.image_url}
         alt={movie.title}
-        className="w-16 h-24 object-cover rounded flex-shrink-0"
+          width={64}
+          height={96}
+          className="w-16 h-24 object-cover rounded flex-shrink-0"
       />
       <div className="flex flex-col justify-between min-w-0 flex-1">
         <div>
@@ -46,14 +49,14 @@ export default function MovieCard({ movie, onEdit, onDelete }: Props) {
           <div className="flex items-center gap-1">
             <button
               onClick={() => onEdit?.(movie)}
-              className="p-1.5 rounded-md text-gray-400 hover:text-zinc-700 hover:bg-gray-100 transition-colors outline-none"
+              className="p-1.5 rounded-md text-gray-400 hover:text-zinc-700 hover:bg-gray-100 transition-colors outline-none hover:cursor-pointer"
               title="Editar película"
             >
               <Pencil size={14} />
             </button>
             <button
               onClick={() => onDelete?.(movie.id)}
-              className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors outline-none"
+              className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors outline-none hover:cursor-pointer"
               title="Eliminar película"
             >
               <Trash2 size={14} />

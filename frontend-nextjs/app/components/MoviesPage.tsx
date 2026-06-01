@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import type { Movie } from '@/app/types/movie'
 import { getMovies } from '@/app/lib/api'
 import MovieForm from './MovieForm'
@@ -10,7 +10,14 @@ export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchMovies = useCallback(async () => {
+  useEffect(() => {
+    getMovies()
+      .then(setMovies)
+      .catch(() => setMovies([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function fetchMovies() {
     setLoading(true)
     try {
       const data = await getMovies()
@@ -20,11 +27,7 @@ export default function MoviesPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
-
-  useEffect(() => {
-    fetchMovies()
-  }, [fetchMovies])
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
