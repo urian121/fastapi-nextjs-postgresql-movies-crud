@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react'
-import type { Movie } from '@/app/types/movie'
 import Image from 'next/image'
+import type { MovieCardProps } from '@/app/types/movie'
 
 function StarRating({ stars }: { stars: number }) {
   return (
@@ -18,14 +18,7 @@ function StarRating({ stars }: { stars: number }) {
   )
 }
 
-interface Props {
-  movie: Movie
-  isNew?: boolean
-  onEdit?: (movie: Movie) => void
-  onDelete?: (id: number) => void
-}
-
-export default function MovieCard({ movie, isNew, onEdit, onDelete }: Props) {
+export default function MovieCard({ movie, isNew, onEdit, onDelete }: MovieCardProps) {
   return (
     <div className={`flex gap-3 bg-white p-3 hover:shadow-md transition-shadow ${isNew ? 'animate-slide-in' : ''}`}>
       <Image

@@ -1,16 +1,8 @@
 import { Film } from 'lucide-react'
-import type { Movie } from '@/app/types/movie'
+import type { MovieListProps } from '@/app/types/movie'
 import MovieCard from './MovieCard'
 
-interface Props {
-  movies: Movie[]
-  loading: boolean
-  newMovieId?: number | null
-  onEdit: (movie: Movie) => void
-  onDelete: (id: number) => void
-}
-
-export default function MovieList({ movies, loading, newMovieId, onEdit, onDelete }: Props) {
+export default function MovieList({ movies, loading, newMovieId, onEdit, onDelete }: MovieListProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="px-6 py-5 bg-white">

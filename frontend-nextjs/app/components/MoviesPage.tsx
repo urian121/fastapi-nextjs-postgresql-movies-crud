@@ -6,6 +6,7 @@ import { getMovies, deleteMovie } from '@/app/lib/api'
 import MovieForm from './MovieForm'
 import MovieList from './MovieList'
 import MovieEditModal from './MovieEditModal'
+import { showToast } from "nextjs-toast-notify";
 
 export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([])
@@ -31,10 +32,15 @@ export default function MoviesPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!window.confirm('¿Eliminar esta película?')) return
     try {
       await deleteMovie(id)
       setMovies(prev => prev.filter(m => m.id !== id))
+
+      showToast.success("¡La Película fue eliminada correctamente!", {
+        position: "bottom-right",
+        transition: "popUp",
+        sound: true,
+      });
     } catch {
       alert('Error al eliminar la película')
     }

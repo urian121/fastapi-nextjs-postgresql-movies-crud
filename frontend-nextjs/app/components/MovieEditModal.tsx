@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { X, Save, Loader2 } from 'lucide-react'
-import type { Movie, MovieFormData } from '@/app/types/movie'
+import type { MovieEditModalProps, MovieFormData } from '@/app/types/movie'
 import { updateMovie } from '@/app/lib/api'
+import { showToast } from "nextjs-toast-notify";
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -14,13 +16,13 @@ const GENRES = [
 
 const STARS_OPTIONS = [5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0]
 
-interface Props {
-  movie: Movie
-  onSave: (updated: Movie) => void
-  onClose: () => void
-}
+export default function MovieEditModal({ movie, onSave, onClose }: MovieEditModalProps) {
+  const [closing, setClosing] = useState(false)
 
-export default function MovieEditModal({ movie, onSave, onClose }: Props) {
+  function handleClose() {
+    setClosing(true)
+  }
+
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<MovieFormData>({
     defaultValues: {
       title: movie.title,
@@ -40,18 +42,31 @@ export default function MovieEditModal({ movie, onSave, onClose }: Props) {
         stars: Number(data.stars),
       })
       onSave(updated)
+
+      showToast.success("¡La Película fue actualizada correctamente!", {
+        position: "bottom-right",
+        transition: "swingInverted",
+        sound: true,
+      });
     } catch {
       alert('Error al actualizar la película')
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl w-full max-w-md mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+    <div
+      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 ${closing ? 'animate-backdrop-out' : 'animate-backdrop-in'}`}
+      onClick={handleClose}
+    >
+      <div
+        className={`bg-white rounded-xl w-full max-w-md mx-4 shadow-xl ${closing ? 'animate-modal-out' : 'animate-modal-in'}`}
+        onClick={e => e.stopPropagation()}
+        onAnimationEnd={() => { if (closing) onClose() }}
+      >
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
           <h2 className="text-base font-semibold text-gray-900">Editar película</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 outline-none cursor-pointer">
+          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 outline-none cursor-pointer">
             <X size={18} />
           </button>
         </div>
@@ -91,7 +106,7 @@ export default function MovieEditModal({ movie, onSave, onClose }: Props) {
           </Field>
 
           <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={onClose} className="px-4 py-1.5 text-sm rounded-lg border border-zinc-200 text-gray-600 hover:bg-gray-50 transition-colors outline-none cursor-pointer">
+            <button type="button" onClick={handleClose} className="px-4 py-1.5 text-sm rounded-lg border border-zinc-200 text-gray-600 hover:bg-gray-50 transition-colors outline-none cursor-pointer">
               Cancelar
             </button>
             <button type="submit" disabled={isSubmitting} className="flex items-center gap-1.5 px-4 py-1.5 text-sm rounded-lg bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-400 text-white transition-colors outline-none cursor-pointer">

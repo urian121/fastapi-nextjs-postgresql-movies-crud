@@ -1,6 +1,8 @@
 # Fullstack Movies App — FastAPI + Next.js + PostgreSQL
 
-API REST para gestionar un catálogo de películas. Backend construido con **FastAPI** y **SQLAlchemy async**, base de datos **PostgreSQL**, y frontend con **Next.js**. Arquitectura por capas: routes → services → schemas → models.
+CRUD fullstack para gestionar un catálogo de películas. Backend con **FastAPI** y **SQLAlchemy async**, base de datos **PostgreSQL**, frontend con **Next.js 16** y **Tailwind CSS v4**.
+
+![Demo](./demo.gif)
 
 ## Stack
 
@@ -11,7 +13,10 @@ API REST para gestionar un catálogo de películas. Backend construido con **Fas
 | Driver DB | asyncpg |
 | Base de datos | PostgreSQL |
 | Validación | Pydantic v2 |
-| Frontend | Next.js |
+| Frontend | Next.js 16 + Tailwind CSS v4 |
+| Formularios | react-hook-form |
+| Íconos | lucide-react |
+| Notificaciones | nextjs-toast-notify |
 
 ## Estructura del proyecto
 
@@ -19,72 +24,114 @@ API REST para gestionar un catálogo de películas. Backend construido con **Fas
 fastapi-nextjs-postgresql-movies-crud/
 ├── backend-fastapi/
 │   ├── app/
-│   │   ├── database/
-│   │   │   └── connection.py     # Engine async, sesión, Base
-│   │   ├── models/
-│   │   │   └── movie_model.py    # Modelo SQLAlchemy — tabla movies
-│   │   ├── schemas/
-│   │   │   └── movie_schema.py   # MovieCreate / MovieUpdate / MovieResponse
-│   │   ├── services/
-│   │   │   └── movie_service.py  # Lógica CRUD
-│   │   ├── routes/
-│   │   │   └── movie_routes.py   # Endpoints /movies
-│   │   └── main.py               # App FastAPI, CORS, lifespan
-│   ├── run.py                    # Punto de entrada
+│   │   ├── database/connection.py     # Engine async, sesión, Base
+│   │   ├── models/movie_model.py      # Modelo SQLAlchemy — tabla movies
+│   │   ├── schemas/movie_schema.py    # MovieCreate / MovieUpdate / MovieResponse
+│   │   ├── services/movie_service.py  # Lógica CRUD
+│   │   ├── routes/movie_routes.py     # Endpoints /movies
+│   │   └── main.py                    # App FastAPI, CORS, lifespan
+│   ├── run.py
 │   ├── requirements.txt
-│   ├── .env                      # Variables de entorno (no commitear)
+│   ├── .env                           # Variables de entorno (no commitear)
 │   └── .env-example
-└── frontend-nextjs/              # (próximamente)
+└── frontend-nextjs/
+    └── app/
+        ├── components/
+        │   ├── MoviesPage.tsx          # Layout principal + estado global
+        │   ├── MovieForm.tsx           # Formulario crear película
+        │   ├── MovieList.tsx           # Lista con scroll vertical
+        │   ├── MovieCard.tsx           # Tarjeta individual + acciones
+        │   └── MovieEditModal.tsx      # Modal editar con animaciones
+        ├── lib/api.ts                  # Llamadas al backend (fetch)
+        ├── types/movie.ts              # Interfaces TypeScript centralizadas
+        └── page.tsx
 ```
 
 ## Requisitos previos
 
 - Python 3.11+
+- Node.js 18+
 - PostgreSQL corriendo localmente (o en Docker)
 
-## Instalación — Backend
+---
+
+## Backend
+
+### Instalación
 
 ```bash
 cd backend-fastapi
 
-# Crear y activar entorno virtual
 python -m venv env
 env\Scripts\activate        # Windows
 source env/bin/activate     # Linux/Mac
 
-# Instalar dependencias
 pip install -r requirements.txt
 ```
 
-## Configuración
+### Configuración
 
-Edita `backend-fastapi/.env` con tus credenciales:
+Edita `backend-fastapi/.env`:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/movies_db
 ```
 
-Crea la base de datos en PostgreSQL:
+Crea la base de datos:
 
 ```sql
 CREATE DATABASE movies_db;
 ```
 
-Las tablas se crean automáticamente al arrancar la app.
+Las tablas se crean automáticamente al arrancar.
 
-## Ejecutar
+### Ejecutar
 
 ```bash
-cd backend-fastapi
 python run.py
 ```
 
-Servidor: `http://127.0.0.1:8000`
+Servidor: `http://127.0.0.1:8000` · Docs: `http://127.0.0.1:8000/docs`
 
-## Documentación interactiva
+---
 
-- Swagger UI → `http://127.0.0.1:8000/docs`
-- ReDoc → `http://127.0.0.1:8000/redoc`
+## Frontend
+
+### Instalación
+
+```bash
+cd frontend-nextjs
+npm install
+```
+
+### Configuración (opcional)
+
+Si el backend corre en un host diferente, crea `frontend-nextjs/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### Ejecutar
+
+```bash
+npm run dev
+```
+
+App: `http://localhost:3000`
+
+---
+
+## Funcionalidades
+
+- **Registrar** película con formulario (título, descripción, año, género, estrellas, URL de imagen)
+- **Listar** películas en tiempo real con scroll vertical
+- **Editar** película desde modal con animaciones suaves (estilo Google Material)
+- **Eliminar** película con actualización instantánea del listado
+- La película recién creada aparece **al inicio** de la lista con animación de entrada
+- Notificaciones **toast** en acciones de crear y editar
+
+---
 
 ## Endpoints
 
@@ -96,68 +143,20 @@ Base URL: `http://127.0.0.1:8000`
 | GET | `/movies/` | Listar todas las películas |
 | GET | `/movies/{id}` | Obtener película por ID |
 | POST | `/movies/` | Crear película |
-| PUT | `/movies/{id}` | Actualizar película (parcial) |
+| PUT | `/movies/{id}` | Actualizar película (campos opcionales) |
 | DELETE | `/movies/{id}` | Eliminar película |
 
 ## Modelo de película
 
-| Campo | Tipo | Requerido | Notas |
-|-------|------|-----------|-------|
-| id | int | auto | Solo en respuesta |
-| title | string | sí | |
-| description | string | sí | |
-| year | int | sí | |
-| image_url | string | sí | |
-| genre | string | sí | |
-| stars | float | sí | Rango 0.0 – 5.0 |
-
-## Cuerpos de petición
-
-**POST `/movies/`**
-
-```json
-{
-  "title": "The Shawshank Redemption",
-  "description": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-  "year": 1994,
-  "image_url": "https://devsapihub.com/img-movies/1.jpg",
-  "genre": "Drama",
-  "stars": 5.0
-}
-```
-
-**PUT `/movies/{id}`** — todos los campos son opcionales:
-
-```json
-{
-  "stars": 4.5,
-  "genre": "Drama / Prison"
-}
-```
-
-## Respuestas
-
-**GET `/movies/{id}`** — `200 OK`
-
-```json
-{
-  "id": 1,
-  "title": "The Shawshank Redemption",
-  "description": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-  "year": 1994,
-  "image_url": "https://devsapihub.com/img-movies/1.jpg",
-  "genre": "Drama",
-  "stars": 5.0
-}
-```
-
-**DELETE `/movies/{id}`** — `204 No Content`
-
-**404 — Película no encontrada**
-
-```json
-{ "detail": "Movie not found" }
-```
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| id | int | Auto — solo en respuesta |
+| title | string | |
+| description | string | |
+| year | int | |
+| image_url | string | |
+| genre | string | |
+| stars | float | Rango 0.0 – 5.0 |
 
 ## Ejemplos con cURL
 
@@ -165,13 +164,10 @@ Base URL: `http://127.0.0.1:8000`
 # Listar todas
 curl http://127.0.0.1:8000/movies/
 
-# Obtener por ID
-curl http://127.0.0.1:8000/movies/1
-
 # Crear
 curl -X POST http://127.0.0.1:8000/movies/ \
   -H "Content-Type: application/json" \
-  -d '{"title":"Inception","description":"A thief enters dreams.","year":2010,"image_url":"https://example.com/inception.jpg","genre":"Sci-Fi","stars":4.8}'
+  -d '{"title":"Inception","description":"A thief enters dreams.","year":2010,"image_url":"https://example.com/inception.jpg","genre":"Ciencia Ficción","stars":4.8}'
 
 # Actualizar parcialmente
 curl -X PUT http://127.0.0.1:8000/movies/1 \

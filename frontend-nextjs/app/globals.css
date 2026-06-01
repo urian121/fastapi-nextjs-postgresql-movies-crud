@@ -36,7 +36,29 @@ button {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
+
+/* Modal — estilo Google / Material */
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes backdrop-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+@keyframes modal-out {
+  from { opacity: 1; transform: scale(1)    translateY(0);   }
+  to   { opacity: 0; transform: scale(0.95) translateY(8px); }
+}
+
+.animate-backdrop-in  { animation: backdrop-in  0.22s cubic-bezier(0.4, 0, 0.2, 1); }
+.animate-backdrop-out { animation: backdrop-out 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.animate-modal-in     { animation: modal-in     0.22s cubic-bezier(0.4, 0, 0.2, 1); }
+.animate-modal-out    { animation: modal-out    0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards; }

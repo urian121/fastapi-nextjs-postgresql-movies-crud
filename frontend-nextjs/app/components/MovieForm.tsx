@@ -2,13 +2,9 @@
 
 import { useForm } from 'react-hook-form'
 import { Save, Loader2, Clapperboard } from 'lucide-react'
-import type { Movie, MovieFormData } from '@/app/types/movie'
+import type { MovieFormProps, MovieFormData } from '@/app/types/movie'
 import { createMovie } from '@/app/lib/api'
 import { showToast } from "nextjs-toast-notify";
-
-interface Props {
-  onSuccess: (movie: Movie) => void
-}
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -28,7 +24,7 @@ const GENRES = [
 
 const STARS_OPTIONS = [5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0]
 
-export default function MovieForm({ onSuccess }: Props) {
+export default function MovieForm({ onSuccess }: MovieFormProps) {
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<MovieFormData>()
 
   async function onSubmit(data: MovieFormData) {
