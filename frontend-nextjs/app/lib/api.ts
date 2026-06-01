@@ -17,3 +17,18 @@ export async function createMovie(data: MovieFormData): Promise<Movie> {
   if (!res.ok) throw new Error('Error al crear la película')
   return res.json()
 }
+
+export async function updateMovie(id: number, data: Partial<MovieFormData>): Promise<Movie> {
+  const res = await fetch(`${API_URL}/movies/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Error al actualizar la película')
+  return res.json()
+}
+
+export async function deleteMovie(id: number): Promise<void> {
+  const res = await fetch(`${API_URL}/movies/${id}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('Error al eliminar la película')
+}

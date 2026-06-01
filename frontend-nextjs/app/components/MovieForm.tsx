@@ -2,12 +2,12 @@
 
 import { useForm } from 'react-hook-form'
 import { Save, Loader2, Clapperboard } from 'lucide-react'
-import type { MovieFormData } from '@/app/types/movie'
+import type { Movie, MovieFormData } from '@/app/types/movie'
 import { createMovie } from '@/app/lib/api'
 import { showToast } from "nextjs-toast-notify";
 
 interface Props {
-  onSuccess: () => void
+  onSuccess: (movie: Movie) => void
 }
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -33,10 +33,9 @@ export default function MovieForm({ onSuccess }: Props) {
 
   async function onSubmit(data: MovieFormData) {
     try {
-      await createMovie({ ...data, year: Number(data.year), stars: Number(data.stars) })
+      const movie = await createMovie({ ...data, year: Number(data.year), stars: Number(data.stars) })
       reset()
-      onSuccess()
-
+      onSuccess(movie)
       showToast.success("¡La Película fue registrada con éxito!", {
         position: "top-right",
         transition: "topBounce",

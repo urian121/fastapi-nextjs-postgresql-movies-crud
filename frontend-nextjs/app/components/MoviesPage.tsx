@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import type { Movie } from '@/app/types/movie'
-import { getMovies } from '@/app/lib/api'
+import { getMovies, deleteMovie } from '@/app/lib/api'
 import MovieForm from './MovieForm'
 import MovieList from './MovieList'
+import MovieEditModal from './MovieEditModal'
 
 export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
+  const [newMovieId, setNewMovieId] = useState<number | null>(null)
+  const [editingMovie, setEditingMovie] = useState<Movie | null>(null)
 
   useEffect(() => {
     getMovies()
@@ -17,15 +20,23 @@ export default function MoviesPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  async function fetchMovies() {
-    setLoading(true)
+  function onMovieCreated(movie: Movie) {
+    setMovies(prev => [movie, ...prev])
+    setNewMovieId(movie.id)
+  }
+
+  function onMovieUpdated(updated: Movie) {
+    setMovies(prev => prev.map(m => m.id === updated.id ? updated : m))
+    setEditingMovie(null)
+  }
+
+  async function handleDelete(id: number) {
+    if (!window.confirm('¿Eliminar esta película?')) return
     try {
-      const data = await getMovies()
-      setMovies(data)
+      await deleteMovie(id)
+      setMovies(prev => prev.filter(m => m.id !== id))
     } catch {
-      setMovies([])
-    } finally {
-      setLoading(false)
+      alert('Error al eliminar la película')
     }
   }
 
@@ -33,13 +44,27 @@ export default function MoviesPage() {
     <div className="flex h-screen bg-gray-100">
       {/* Left — form */}
       <aside className="w-2/5 bg-gray-50 border-r border-gray-200 flex flex-col">
-        <MovieForm onSuccess={fetchMovies} />
+        <MovieForm onSuccess={onMovieCreated} />
       </aside>
 
       {/* Right — list */}
       <main className="w-3/5 flex flex-col bg-gray-50">
-        <MovieList movies={movies} loading={loading} />
+        <MovieList
+          movies={movies}
+          loading={loading}
+          newMovieId={newMovieId}
+          onEdit={setEditingMovie}
+          onDelete={handleDelete}
+        />
       </main>
+
+      {editingMovie && (
+        <MovieEditModal
+          movie={editingMovie}
+          onSave={onMovieUpdated}
+          onClose={() => setEditingMovie(null)}
+        />
+      )}
     </div>
   )
 }

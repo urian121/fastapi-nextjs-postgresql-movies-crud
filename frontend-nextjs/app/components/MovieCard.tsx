@@ -20,13 +20,14 @@ function StarRating({ stars }: { stars: number }) {
 
 interface Props {
   movie: Movie
+  isNew?: boolean
   onEdit?: (movie: Movie) => void
   onDelete?: (id: number) => void
 }
 
-export default function MovieCard({ movie, onEdit, onDelete }: Props) {
+export default function MovieCard({ movie, isNew, onEdit, onDelete }: Props) {
   return (
-    <div className="flex gap-3 bg-white p-3 hover:shadow-md transition-shadow">
+    <div className={`flex gap-3 bg-white p-3 hover:shadow-md transition-shadow ${isNew ? 'animate-slide-in' : ''}`}>
       <Image
         src={movie.image_url}
         alt={movie.title}

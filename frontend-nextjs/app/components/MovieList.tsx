@@ -5,9 +5,12 @@ import MovieCard from './MovieCard'
 interface Props {
   movies: Movie[]
   loading: boolean
+  newMovieId?: number | null
+  onEdit: (movie: Movie) => void
+  onDelete: (id: number) => void
 }
 
-export default function MovieList({ movies, loading }: Props) {
+export default function MovieList({ movies, loading, newMovieId, onEdit, onDelete }: Props) {
   return (
     <div className="flex flex-col h-full">
       <div className="px-6 py-5 bg-white">
@@ -35,7 +38,13 @@ export default function MovieList({ movies, loading }: Props) {
         {!loading && movies.length > 0 && (
           <div className="flex flex-col gap-3">
             {movies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                isNew={movie.id === newMovieId}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             ))}
           </div>
         )}
